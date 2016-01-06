@@ -61,16 +61,18 @@ def AddRoute(app):
     def get_author_info():
         return render_homepage("aaronyin-intro.html")
 
+
+
+# init app, so it can call from uwsgi or gunicorn, global app is already created by Server()
+s = Server(HomePageServer())
+AddRoute(s.app)
+app = s.app
+
 if __name__ == '__main__':
-    s = Server(HomePageServer())
-    AddRoute(s.app)
     s.bind(host="0.0.0.0", port=10091, debug=True)
     s.run()
-
-
-
-
-
+    
+    
 
 
 
