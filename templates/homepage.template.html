@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<!-- saved from url=(0039)https://spacy.io/blog/introducing-spacy -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>AaronYin's Blog</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="description" content="">
+    <meta itemporop="name" content="">
+    <meta itemprop="description" content="">
+    <meta itemprop="image" content="">
+    <meta property="article:published_time" content="2015-02-19T00:00:00.000Z">
+
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="newest stylesheet" href="/css/homepage.css">
+    
+  </head>
+  <body id="blog">
+    <header class="ah-header-title">
+      <div class="slogan ah-slogan-plus">AARON-YIN BLOG
+      </div>
+    </header>
+    <nav role="navigation">
+      <li class="active"><a href="/blog/introlist" class="ah-blog-btn ah-a-as-btn">Blog</a></li>
+      <li><a href="/author">Author</a></li>
+    </nav>
+    
+    <main id="content" class="ah-main-content">
+      Welcome To AaronYin's Blog
+    </main>
+
+
+    <a href="http://github.com" title="Visit more on Github" target="_blank" class="button button-twitter ah-github-btn">Visit my Github</a>
+
+    <!-- <footer role="contentinfo" class="meta">
+      <div class="discuss"> <a target="_blank" href="https://www.reddit.com/r/programming/comments/2tlyrr/spacy_industrialstrength_nlp_with_pythoncython" title="Discuss on Reddit" class="button button-reddit">Reddit Thread</a> <a target="_blank" href="https://news.ycombinator.com/item?id=8942783" title="Discuss on Hacker News Thread" class="button button-hn">Hacker News</a>
+      </div>
+      <section class="ah-intro ">
+        <p> Aaron Yin is the author of this blog. </p>
+      </section>
+    </footer> -->
+    <script src="/js/prism.min.js"></script>
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/snakefoot.js"></script>
+    <script src="/js/homepage.client.js"></script>
+    <script type="text/javascript">
+      /* main
+      ======================================================
+      */
+      $(document).ready(function () {
+        
+        var MAIN_CONTENT_STRING = `{{main_content_string|safe}}`
+        var new_main_content = $(MAIN_CONTENT_STRING)
+        replace_main_content(new_main_content)
+
+      })
+    </script>
+
+    <!-- Details polyfill-->
+    <script>
+      // var details = document.getElementsByTagName("details");
+      // var summary = document.getElementsByTagName("summary");
+      // for(var i = 0; i < details.length; i++) {
+      //   (details[i].getAttribute("open") == null) ? details[i].setAttribute("data-open", "false") : details[i].setAttribute("data-open", "true");
+      // }
+      // for(var i = 0; i < summary.length; i++) {
+      //   summary[i].addEventListener( "click", function(e) {
+      //       var parent = this.parentElement;
+      //       (parent.getAttribute("data-open") == "false") ? parent.setAttribute("data-open", "true") : parent.setAttribute("data-open", "false");
+      //   });
+      // }
+    </script>
+    <footer role="contentinfo">
+      <p class="copyright ah-contact">Aaron Yin is the author of this blog. </p>
+      <p class="copyright ah-contact">Contact: 919155161@qq.com </p>
+    </footer>
+  
+</body></html>
+
+

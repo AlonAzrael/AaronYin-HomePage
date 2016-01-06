@@ -1,0 +1,87 @@
+
+
+/*#
+link-color: #009acc;
+theme-color: #f25f5c;
+*/
+
+.ah-header-title {
+    height: 100px;
+    padding: 0;
+}
+
+.ah-blog-intro article {
+    margin: auto;
+    margin-bottom: 80px;
+    /*width: 500px;*/
+}
+
+.ah-blog-intro p {
+    /*white-space: pre;*/
+}
+
+.ah-blog-intro header {
+    margin-bottom: 20px;
+}
+
+.ah-blog-intro-title {
+    margin-bottom: 10px;
+}
+
+.ah-blog-intro-title-text {
+    font-size: 30px;
+    font-weight: bold;
+    font-family: Arial;
+}
+
+.ah-blog-intro-title-text:hover {
+    color: #009acc;
+    cursor: pointer;
+}
+
+.ah-blog-intro-title-text:hover span:after{
+    padding: 0 0 0 0.5em;
+    content: "☍";
+}
+
+.ah-slogan-plus {
+    padding: 0;
+    margin-top: 50px;
+}
+
+.ah-subhead time {
+    color: #f25f5c;
+}
+
+.ah-intro {
+    font-size: 25px;
+    margin-top: 30px;
+    font-weight: bold;
+    font-family: "Karla", Arial, sans-serif;
+    /*color: rgba(10,130,150,1);*/
+}
+
+.ah-contact {
+    font-size: 25px;
+    font-family: "monospace", Arial, sans-serif;
+    color: rgba(255,255,255,1);
+}
+
+footer p {
+    padding: 0;
+    margin: 0;
+}
+
+.ah-github-btn {
+    margin: auto;
+    width: 180px;
+    display: block;
+}
+
+.ah-a-as-btn {
+    cursor: pointer;
+}
+
+
+
+
