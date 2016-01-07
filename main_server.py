@@ -29,18 +29,6 @@ def AddRoute(app):
     def index():
         return render_homepage("blog_intro")
 
-    @app.route('/js/<path:path>')
-    def send_js(path):
-        return send_from_directory('./static/js', path)
-
-    @app.route('/css/<path:path>')
-    def send_css(path):
-        return send_from_directory('./static/css', path)
-
-    @app.route('/image/<path:path>')
-    def send_image(path):
-        return send_from_directory('./static/image', path)
-
     @app.route("/blog/introlist")
     def get_blog_intro_list():
         return render_homepage("blog_intro")
