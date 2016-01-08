@@ -82,6 +82,27 @@ footer p {
     cursor: pointer;
 }
 
+.ah-float-div {
+    display: inline-block;
+}
+
+.ah-float-image {
+    float: left;
+}
+
+.ah-normal-image {
+    width: 200px;
+    height: 200px;
+}
+
+.ah-origin-image {
+    width: 100%;
+    height: auto;
+}
+
+article li a {
+    border-bottom: 2px solid;
+}
 
 
 
