@@ -1,0 +1,295 @@
+
+<main id="content" class="ah-main-content">
+
+  <article class="post">
+    <header>
+      <h2 class="ah-blog-title">Bring the power of Extremely Randomized Trees to Golang.</h2>
+      <div class="subhead ah-subhead">
+        on <time>2016-1-6 Monsday</time>
+      </div>
+    </header>
+    <div class="ah-article-plist">
+
+    <h4>Introduction of Extremely Randomized Trees </h4>
+    <p>
+        <a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.65.7485&rep=rep1&type=pdf">Extremely Randomized Trees(short for ExtraTrees)</a> is a decision tree ensemble machine learning algorithm. 
+    </p>
+    <p>
+        During my practice in <a href="https://www.kaggle.com/">kaggle dataset</a>, I found out that ExtraTrees is a very fast algorithm for both classification and regression task, and it produces very good result too. 
+        So I have a peek into the paper to understand how it works.
+    </p>
+    <p>
+        So first of all, it is a ensemble method of CART(bisect decision tree). <br>
+        A decision tree is used to create a tree of samples, and each leaf of the tree is similar(by target value) entity.<br>
+        And a tree ensemble treat each tree as a simple rule to split data space, and with so many different rules, we can then approximate a complex yet powerful rule.(also called boosting)<br>
+        There is an ancient story named 'The Blind Men and the Elephant'(aka 盲人摸象). It is about several blind men observe elephant by their hands, each one of them touch a dffierent part of the elephant.<br>
+        Here, the data space is like the elephant, which is too big to fully observe, not to mention we are 'blind'.<br>
+        Decision tree is like a blind man, which only observe one part of data space, so the decision comes from one tree is inaccurate, but gather all blind men, we can have much better observation.
+        <!-- Think about it, how do you seperate different balls, like football, rugby, basketball, pingpong, tennis, badminton, by using multiple SIMPLE rules? The size of balls can be the first rule. Weight is another choice.
+        Inflatable can also be a rule. Dont forget circularity is quite useful too.<br>
+        So now, large-size{football, rugby, basketball}, small-size{pingpong, tennis, badminton},  -->
+    </p>
+    <p>
+        ExtraTrees is inherited form RandomForest.<br>
+        The basic idea of RandomForest is to use random subsamples(about 2/3) and subfeatures to make trees, that is for each tree, we random sampling from original dataset(also called bootstrapping), and then we random select part of original features(also called random subspace).<br>
+        RandomForest attempts to send some blind men to touch elephant, and each blind men will touch a random place of elephant.
+    </p>
+    <p>
+        ExtraTrees differs from RandomForest in the way it split data space. Unlike RandomForest will try to find the best split for each node of a tree, ExtraTrees split each node by random then choose the best split, and it use full dataset for each tree.
+    </p>
+    <p>
+        The fact is ExtraTrees explores more possible situations of data space, it actually trys much more different rules of spliting data space than RandomForest.
+    </p>
+    <p>
+        You can read the original paper for a mathematically detailed explanation.
+    </p>
+    
+    <h4>ExtraTrees is about 2x faster than RandomForest</h4>
+    <p>
+        Due to ExtraTrees use random split, so it will much faster than RandomForest, who trys to find best split.
+        I use <a href="https://stat.duke.edu/~zo2/bark/html/sim.Friedman1.html">Simulated Regression Problem Friedman 1</a> and scikit-learn for benchmarking, and ExtraTrees is 2x faster than RandomForest, and about 10% better than RandomForest in prediction.
+    </p>
+    <p>
+        And there is a good tree ensemble implmentation in golang, called <a href="https://github.com/ryanbressler/CloudForest">CloudForest</a>. But it doesn't implement ExtraTrees. So I decide to make my own implmentation, and hope to overspeed than scikit-learn version.
+    </p>
+
+    <h4>ExtraTrees in golang is slower than scikit-learn version</h4>
+    <p>
+        I make three version of implementation(for optimization), and still a little bit slow for a single tree.<br>
+        As for parallel computing, golang version is much worse than sklearn version, especially for large dataset.<br>
+        No matter what, I still learn some experience of implementing high performance algorithm, and they are shown below:
+    <li>efficient 2d array 
+<pre><code class="language-go">
+package main
+import "fmt"
+ 
+func main() {
+    var row, col int
+    fmt.Print("enter rows cols: ")
+    fmt.Scan(&row, &col)
+ 
+    /*
+    this kind of 2d array allocation is bad for performance, 
+    because it might be bad though, for locality, 
+    as there would be no guarantee that the separate allocations would be localized in memory.
+    */
+    // allocate composed 2d array
+    a := make([][]int, row)
+    for i := range a {
+        a[i] = make([]int, col)
+    }
+
+    /*
+    this technique will maintain allocations locality
+    */
+    // allocate composed 2d array
+    a := make([][]int, row)
+    e := make([]int, row * col)
+    for i := range a {
+        a[i] = e[i*col:(i+1)*col]
+    }
+ 
+    // array elements initialized to 0
+    fmt.Println("a[0][0] =", a[0][0])
+ 
+    // assign
+    a[row-1][col-1] = 7
+ 
+    // retrieve
+    fmt.Printf("a[%d][%d] = %d\\n", row-1, col-1, a[row-1][col-1])
+ 
+    // remove only reference
+    a = nil
+    // memory allocated earlier with make can now be garbage collected.
+}
+</code></pre>
+    </li><br>
+
+    <li> Memory allocation could be big overhead when it happens so man times.
+<pre><code class="language-go">/* 
+after the node is split, we save new index array of left and right child, 
+for each child, I make a allocation of size=2*n_cur_samples 
+*/
+left_index := 0
+right_index := 0
+left_child_index_array := make(IndexArray, n_samples)
+left_child_index_array := make(IndexArray, n_samples)
+
+/*
+after split, I cut the array.
+*/
+left_child_index_array = left_child_index_array[0:left_index]
+right_child_index_array = right_child_index_array[0:right_index]
+
+/*
+the code above is quite expensive as there are actually so many splits.
+*/
+
+/*
+a split can be seen as one iteration of quicksort.
+*/
+func split_node(index_array []int, spliter float) {
+  // index_array is a slice of dataset_index_array 
+
+  left, right := 0, len(index_array) - 1
+
+  // Pile elements smaller than the pivot on the left
+  for i := range index_array {
+    if get_data_for_column(index_array[i]) < spliter {
+      index_array[i], index_array[left] = index_array[left], index_array[i]
+      left++
+    }
+  }
+
+  left_child_index_array := index_array[:left]
+  right_child_index_array := index_array[left:]
+}
+</code></pre>
+    </li><br>
+
+    <li> random is also expensive, if use too many times.
+<pre><code class="language-go">/*
+I change the spliter choose method by three random call.
+*/
+ind_middle := random_integer(start, end-1)
+ind_a := random_integer(start, ind_middle)
+ind_b := random_integer(ind_middle+1, end)
+
+spliter := (data_array[ind_a]+data_array[ind_b])*0.5
+
+/*
+And turns out, three random calls slow down the code. 
+So I use generate 1000 random number uniformly between [0,1), 
+and use it as random number for random calls.
+So the Extremely Randomized Trees become Not so Extremely Randomized Trees(-_-||).
+But it didn't hurt the prediction though.
+*/
+var PESUEDO_RANDOM_NUMBER_LIST []float32
+var PR_INDEX int
+func init_random_seed_pesuedo(n_seed int) {
+    //init 
+    rand.Seed(time.Now().Unix())
+
+    PESUEDO_RANDOM_NUMBER_LIST = make([]float32, n_seed)
+    PR_INDEX = 0
+
+    for i := 0; i < n_seed; i++ {
+        PESUEDO_RANDOM_NUMBER_LIST[i] = rand.Float32()
+    }
+}
+func random_integer_pesuedo(min int, max int) int {
+    pf := PESUEDO_RANDOM_NUMBER_LIST[PR_INDEX]
+    PR_INDEX += 1
+    if PR_INDEX == len(PESUEDO_RANDOM_NUMBER_LIST) {
+        PR_INDEX = 0
+    }
+    var a ,b float32
+    a = float32(min)
+    b = float32(max)
+    return int((b+0.99 - a)*pf+a)
+}
+</code></pre>
+    </li><br>
+
+    <li> Also Check <a href="http://stackoverflow.com/questions/14298523/why-does-adding-concurrency-slow-down-this-golang-code">this question from stackoverflow </a>, it tells people that rand.Float64() should be properly used, as it has a mutex lock.
+    </li>
+
+    </p>
+
+    <p>
+        As for the reason my code is slower than sklearn version, I still fail to figure it out. My guess is that it has something to do with goroutines, since it is well designed for high efficient concurrency, and not just parallel computing.
+    </p>
+    <p>
+        So a new lesson I learn from this: go is more suitable for web task, not scientific task.<br>
+        Cython is a much better choice for scientific computing.
+    </p>
+
+    <h4>ExtraTrees in practice</h4>
+    <p>
+        For classification task, the best split is choosen by gini impurity, gini_impurity = 1 - ∑(c in n_class) (nc/N)^2, (nc is number of class c samples, N is total number of samples). nc can be dynamically update, so for classification, ExtraTrees can be insert new item and incrementally grow.
+    </p>
+    <p>
+        But for regression task, the best split is choosen by minimized variance, which demand two pass computation. And can not be update dynamically. So I do a some research about algorithms for calculating variance, and turns out, we can use method below:
+<pre><code class="language-c">
+Let n ← 0, Sum ← 0, SumSq ← 0
+For each datum x:
+    n ← n + 1
+    Sum ← Sum + x
+    SumSq ← SumSq + x × x
+Variance = (SumSq − (Sum × Sum) / n) / (n − 1)
+</code></pre>
+
+        Sum ,SumSq and n can be dynamically updated.<br>
+        Only problem here is a statement 'Thus this algorithm should not be used in practice.', which comes from <a href="https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance">wikipedia</a>. 
+        However, I repeat the experiment from <a href="http://www.johndcook.com/blog/2008/09/26/comparing-three-methods-of-computing-standard-deviation/">this blog</a>, and I found out that, dynamically variance will fail only you have data which has large mean value and small variance, look at the script below:
+<pre><code class="language-python">
+import numpy as np
+from numpy import random
+
+def gen_data():
+    data = random.random(10)
+    data += 1e+6
+    # data *= 1e+9
+    # data = minmax_scale(data)
+    print data
+    return np.asarray(data, dtype=np.float32)
+
+# method proposed by Donald Knuth
+def online_variance(data):
+    n = 0
+    mean = 0.0
+    M2 = 0.0
+    
+    for x in data:
+        n += 1
+        delta = x - mean
+        mean += delta/n
+        M2 += delta*(x - mean)
+
+    if n < 2:
+        return float('nan');
+    else:
+        return M2 / (n)
+
+# dont-use-in-practice method
+def stream_variance(data):
+    sum_x = np.sum(data)
+    sum_x2 = np.sum(data**2)
+    n = len(data)
+
+    mean = sum_x / n
+    stdvar = sum_x2/n - mean**2
+    return stdvar
+
+data = gen_data()
+
+# compare three method
+print "std var: ", np.var(data)
+print online_variance(data)
+print stream_variance(data)
+
+# the result is shown below, 
+[ 1000000.07076375  1000000.97250897  1000000.60644677  1000000.73397427 1000000.13540816  
+1000000.65904645  1000000.63151332  1000000.66857414
+  1000000.92634199  1000000.6325138 ]
+
+std var:  0.0769290830811
+0.0826562499998
+145945.23999
+
+# we can see that np.var and online_variance is still working, but stream_variance is lost.
+# But who use that kind of data in reality...
+
+# As for the reason why stream_variance fail, just make an adjustment: 
+# dtype=np.float32 to dtype=np.float64 or dtype=np.float128.
+</code></pre>
+    So in conclusion you can use stream_variance in most cases, if you need to udpate variance dynamically.
+    </p>
+
+    </div>
+
+</article>
+</main>
+
+
+

@@ -1,0 +1,79 @@
+
+<main id="content" class="ah-main-content">
+
+  <article class="post">
+    <header>
+      <h2 class="ah-blog-title">If lost in Bipartite Graph Search, try find a way out in Extremely Randomized KMeans Trees.</h2>
+      <div class="subhead ah-subhead">
+        on <time>2016-1-1 Monsday</time>
+      </div>
+    </header>
+    <div class="ah-article-plist">
+
+    <h4>Introduction to Extremely Randomized KMeans Trees</h4>
+    <p>
+        I have <a href="/blog/name/golang_extratrees">another blog</a> talk about an algorithm called Extremely Randomized Trees, which is a algorithm for building trees for supervised learning. And as the name suggests, Extremely Randomized KMeans Trees(short for ExtraKMeansTrees) is for clustering. It is proposed by <a href="http://www.cs.ubc.ca/~lowe/papers/12mujaCRV.pdf">this paper, Fast Matching of Binary Features</a>.
+    </p>
+    <p>
+        ExtraKMeansTrees ensemble kmeans tree, each kmeans tree is a hierarchical kmeans clustering, that means, each node in the tree, is a kmeans cluster.<br>
+        In other word, each tree will random select k center, and generate k cluster, and for each cluster it will then repeat the split procedure, and finally form a cluster tree.<br>
+        Each tree is a weak cluster, and making a strong cluster by ensembling them. Of course, you might wonder, does it really work? Well, accroding to its original paper, yes, it work quite good.<br>
+    </p>
+
+    <h4>Why do we need ExtraKMeansTrees?</h4>
+    <p>
+        I like to have earphone weared during work time, and the best music player that I ever found is NetEase Cloud Music(aka 网易云音乐).<br>
+        It seems like NetEaseMusic are popular among young generation in China. One reason is that they have good music store. Another reason is the daily recommend system, which generate 20 music for recommendation.<br>
+        And that's why I use NetEaseMusic, since they are only one who have recommend system.
+    </p>
+    <p>
+        The thing is NetEaseMusic's recsys is actually not so good from my point of view. But still, it works. It draw my attention, and make me listen to those 20 music, even I almost got disappointed every day, I still keep listening.<br>
+        Why is that? Because human beings are <b>lazy and greedy</b>. Getting things for free make us happy, even a little. So having a recommend system is not about predicting right, is about throwing new stuff to users, and keep users using the app.<br>
+        However, why is other music app refuse to build recommend system? Is it really hard to bulid a recommend system?
+    </p>
+    <p>
+        So I start to thinking, what is the hardest part of building a recsys? 
+        The answer is that making a real recsys require large computational resource, cause usually, there are 10m+ users, and 100k+ items. And current recsys algorithm reqiure large resource both in cpu usage and memory usage.<br>
+        Let's take memory-based collaborative filtering(short for CF) as example. To recommend items, CF will maintain a similarity matrix, and get new items from a user's neighbors. So the finding neighbors is critical for CF. The thing is CF defines neighobrs as other users who share most same items with the current user. From graph perspective, the more same item that two user connect to, the more similar is two user.<br>
+        This method is what I call Bipartite Graph Search. And it is easily get lost in( it is O(n*(n-1)/2), n=n_user ), if the data is large.
+    </p>
+    <p>
+        And that's why we need ExtraKMeansTrees. ExtraKMeansTrees can generate neighbors for user with so much less cpu usage(memory is stil problem), and it can be used for parallel computing since it is a tree ensemble.
+    </p>
+    
+    <h4>ExtraKMeansTrees RecSys in Practice</h4>
+    <p>
+        Let's go back to NetEaseMusic example, we can generate 40 trees, then each user will have a cluster in trees, and each cluster is different from each other . Note that we can even create trees by different subdataset, by different music style, like rock style trees, folk style trees, korean style trees, etc.
+    </p>
+    <p>
+        For each cluster, we assign a weight, to represent its importance. We random select a music from the cluster(many way to do that), so we now have 40 music. After that, we random choose 20 out of 40, by cluster weight, the more important a cluster is, its recommend will have more probability to select.<br>
+        For each music that user like, its corresponding cluster will have more weight.<br>
+        In this case, we consider user's feedback, so that enhancing recsys's quality.
+    </p>
+    <p>
+        Moreover, we can set a upgrade period, to regenerate KMeans Tree one at a time. So it can take fully advantage of its dynamism.
+    </p>
+    <p>
+        And the new user can be well handled too, because it is a hierarchical tree, so new user can be assign to a cluster eventually. If some cluster grows too big, then simply split the cluster. See, ExtraKMeansTrees is quite suitable for recsys~
+    </p>
+    <p>
+        Finally, the most critical problem is how to compute distance of two vec(user or item) efficiently.
+        Consider the vec we have in recsys is sparse vector, the data is sparse matrix. So it can be efficiently calculated by an algorithm called <a href="https://en.wikipedia.org/wiki/Sparse_matrix">CSR(Compressed row Storage)</a>. It finally become O(n+m) for two vec, one has n non-zero values, and the other has m non-zero values. <a href="https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=3&cad=rja&uact=8&ved=0ahUKEwjgpdLUqZzKAhVLjpQKHWuRCbQQFggqMAI&url=https%3A%2F%2Fcseweb.ucsd.edu%2Fclasses%2Fsp11%2Fcse291-c%2Ftalks%2Fmavec04.ppt&usg=AFQjCNGEDCymTT8FpFQVhhIt_S4fkxUEKQ&sig2=bRyPD37glqS9K1-lZKChQw">This ppt</a> make a wonderful describtion.
+    </p>
+
+    <h4>A little heads-up for using csr matrix in scipy</h4>
+    <p>
+        Well, the tip is don't use csr matrix if you need to reconstruct it frequently. Csr matrix in scipy is efficient, only if you don't touch its structure. That's what I learn from my first implementation of ExtraKMeansTrees in python.
+    </p>
+    <p>
+        After I understand the way csr matrix work, I use cython(and numpy) to implement ExtraKMeansTrees. And it is so much faster..., since it doesn't make new sub csr matrix(using index array instead)<br>
+        As for a short introduction to cython, I would recommend <a href="https://spacy.io/blog/writing-c-in-cython">this blog</a>.
+    </p>
+    
+    </div>
+
+</article>
+</main>
+
+
+

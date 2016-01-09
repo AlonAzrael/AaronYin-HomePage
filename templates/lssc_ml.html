@@ -40,7 +40,7 @@
     </p>
     <p>
         First we need to crop the bounding rect of shape to remove blank area, and use a not so usual resample method to transform original image to 50*50(or other proper size you want) binary matrix.<br>
-        The reason we can't use usual image resample algorithm is that mine is better... Check the image below, they are resized to 30*30, order by ( origin, grid-resize, opencv-resize )
+        The reason we don't use usual image resample algorithm is that mine(I call it grid-resize) is better... Check the image below, they are resized to 30*30, order by ( origin, grid-resize, opencv-resize )
         <div class="ah-float-div">
             <img class="ah-float-image ah-normal-image"  src="/static/image/wo.jpg"></img>
             <img class="ah-float-image " style="width:30px;height:30px;"  src="/static/image/30*30.grid_resize.jpg"></img>
