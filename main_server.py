@@ -47,7 +47,7 @@ def AddRoute(app):
 
     @app.route("/author")
     def get_author_info():
-        return render_homepage("aaronyin-intro.html")
+        return render_homepage("aaronyin-intro")
 
 
 
