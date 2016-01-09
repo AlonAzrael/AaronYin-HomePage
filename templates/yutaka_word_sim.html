@@ -1,0 +1,80 @@
+
+<main id="content" class="ah-main-content">
+
+  <article class="post">
+    <header>
+      <h2 class="ah-blog-title">How do you search talented students in your school?</h2>
+      <div class="subhead ah-subhead">
+        on <time>2016-1-1 Monsday</time>
+      </div>
+    </header>
+    <div class="ah-article-plist">
+
+    <h4>SQL is for good students</h4>
+    <p>
+        In general, we think a student is good, because he/she has good grade. And you can simply run sql on database to get a list of good student. But truth is, some other talented students will be unable to track if only use sql.
+    </p>
+    <p>
+        Because their talent won't be recorded in school's database.
+    </p>
+
+    <h4>Search keywords are tomorrow's big data</h4>
+    <p>
+        So here I proposed a method, based on algorithm called yutaka word sim(that's how I called it), to search for talented students, who leave tracks as search keywords(keywords used in search-engine-like websites).
+    </p>
+    <p>
+        The method represents each student as the keywords that students used in search engine and some other website(like Amazon), and we can get these keywords by students'ip and http request sends from such ip(if you have access to those routers).
+    </p>
+    <p>
+        And then, we need to manually maintain serveral list of keywords, each list represent a feature of student(called as Standard Feature Keywords). For example, a big data company wants to hire student that has interest in python, data science, and movie. So we manually select few words for each feature, and the final keywords we have is like: 
+<pre><code class="language-json">
+{
+    "data science": ["machine learning", "data minging", "neural netowrk", "decision tree"],
+    
+    "python": ["scikit-learn", "cython", "pandas"],
+
+    "movie": ["titanic", "source code", "inception"]
+}
+</code></pre>
+        And we then generate each students feature vector. We can use algorithm below:
+<pre><code class="language-python">
+student_feature_vec = []
+for keyword in students.keywords():
+    for feature_keyword_list in standard_feature_keywords:
+        feature_val = 0
+        for feature_keyword in feature_keyword_list:
+            feature_val += yutaka_word_sim(keyword, feature_keyword)
+        student_feature_vec.append(feature_val)
+</code></pre>
+        With students feature matrix, we can do sql to find out who is the student we believed as talented.
+        And it will work, since a student who likes using python to process task involving data science, and also a movie fans, will have a lot search keywords about python, data science, and movie.
+    </p>
+
+    <h4>Yutaka Word Sim</h4>
+    <p>
+        To metric word similarity, one complex method is using <a href="https://en.wikipedia.org/wiki/Bag-of-words_model">bag of words</a> or <a href="https://en.wikipedia.org/wiki/Word2vec">word2vec</a>. But both method require corpus.
+    </p>
+    <p>
+        Yutaka word sim method is proposed by <a href="http://www.wwwconference.org/www2007/papers/paper632.pdf">this paper</a>. The main idea is to input two word into search engine, and use page count as similarity. This is so brilliant, because search engine has the biggest corpus in the world, and thus, it work, if you have doubt, you can try yourself.
+    </p>
+
+    <h4>Combine ExtraKMeansTrees with YutakaWordSim</h4>
+    <p>
+        Using Standard Feature Keywords, we can transform user's keywords data into feature vector, and apply machine learning or sql on it.
+    </p>
+    <p>
+        And yet, if we have a big bag of words, we can build a word cluster by applying ExtraKMeansTrees on the words data. Then we can query a specific word's neighbor as we want. This can be useful when we don't know how to set proper Standard Feature Keywords.
+    </p>
+
+    <h4>Conclusion</h4>
+    <p>
+        So this blog is about useing a technique called Yutaka Word Sim, to solve a problem reqiuring text mining. And I suddenly have this feeling that I should find a job involved with text mining or text intelligence, since words are everywhere.
+    </p>
+
+    </div>
+
+</article>
+</main>
+
+
+
